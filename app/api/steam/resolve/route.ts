@@ -1,27 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { parseSteamInput, resolveVanityUrl, fetchPlayerSummaries } from '@/lib/steam-api';
+import { getEffectiveApiKey } from '@/lib/steam-key';
 
 export const dynamic = 'force-dynamic';
-
-function getEffectiveApiKey(clientKey?: string): string {
-  if (clientKey && clientKey.trim()) return clientKey.trim();
-  if (process.env.STEAM_API_KEY && process.env.STEAM_API_KEY.trim()) return process.env.STEAM_API_KEY.trim();
-  try {
-    const { getRequestContext } = require('@opennextjs/cloudflare');
-    const ctx = getRequestContext();
-    if (ctx?.env?.STEAM_API_KEY) return String(ctx.env.STEAM_API_KEY).trim();
-  } catch {
-    // Ignore in local node
-  }
-  return '';
-}
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const inputs: string[] = body.inputs || [];
     const clientApiKey: string = body.apiKey || '';
-    const apiKey = getEffectiveApiKey(clientApiKey);
+    const apiKey = await getEffectiveApiKey(clientApiKey);
 
     if (!inputs || inputs.length === 0) {
       return NextResponse.json({ error: 'No player inputs provided' }, { status: 400 });
@@ -48,8 +36,6 @@ export async function POST(req: NextRequest) {
           let errorMsg = `Could not resolve vanity username "${parsed.value}".`;
           if (!apiKey) {
             errorMsg = `Steam API Key is missing. Set STEAM_API_KEY in .env.local / Cloudflare or enter your key in the API Key settings.`;
-          } else if (apiKey.length !== 32) {
-            errorMsg = `Steam API Key is invalid (${apiKey.length} characters instead of 32). Check for missing characters from steamcommunity.com/dev/apikey.`;
           }
           resolvedResults.push({
             inputQuery: rawInput,

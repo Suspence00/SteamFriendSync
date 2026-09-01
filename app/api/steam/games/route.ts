@@ -1,27 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchOwnedGames } from '@/lib/steam-api';
+import { getEffectiveApiKey } from '@/lib/steam-key';
 
 export const dynamic = 'force-dynamic';
-
-function getEffectiveApiKey(clientKey?: string): string {
-  if (clientKey && clientKey.trim()) return clientKey.trim();
-  if (process.env.STEAM_API_KEY && process.env.STEAM_API_KEY.trim()) return process.env.STEAM_API_KEY.trim();
-  try {
-    const { getRequestContext } = require('@opennextjs/cloudflare');
-    const ctx = getRequestContext();
-    if (ctx?.env?.STEAM_API_KEY) return String(ctx.env.STEAM_API_KEY).trim();
-  } catch {
-    // Ignore in local node
-  }
-  return '';
-}
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const playerIds: string[] = body.playerIds || [];
     const clientApiKey: string = body.apiKey || '';
-    const apiKey = getEffectiveApiKey(clientApiKey);
+    const apiKey = await getEffectiveApiKey(clientApiKey);
 
     if (!playerIds || playerIds.length === 0) {
       return NextResponse.json({ error: 'No player IDs provided' }, { status: 400 });
