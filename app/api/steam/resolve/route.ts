@@ -3,12 +3,25 @@ import { parseSteamInput, resolveVanityUrl, fetchPlayerSummaries } from '@/lib/s
 
 export const dynamic = 'force-dynamic';
 
+function getEffectiveApiKey(clientKey?: string): string {
+  if (clientKey && clientKey.trim()) return clientKey.trim();
+  if (process.env.STEAM_API_KEY && process.env.STEAM_API_KEY.trim()) return process.env.STEAM_API_KEY.trim();
+  try {
+    const { getRequestContext } = require('@opennextjs/cloudflare');
+    const ctx = getRequestContext();
+    if (ctx?.env?.STEAM_API_KEY) return String(ctx.env.STEAM_API_KEY).trim();
+  } catch {
+    // Ignore in local node
+  }
+  return '';
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const inputs: string[] = body.inputs || [];
     const clientApiKey: string = body.apiKey || '';
-    const apiKey = clientApiKey || process.env.STEAM_API_KEY || '';
+    const apiKey = getEffectiveApiKey(clientApiKey);
 
     if (!inputs || inputs.length === 0) {
       return NextResponse.json({ error: 'No player inputs provided' }, { status: 400 });
@@ -32,12 +45,16 @@ export async function POST(req: NextRequest) {
         if (resolvedId) {
           resolvedResults.push({ inputQuery: rawInput, id: resolvedId });
         } else {
+          let errorMsg = `Could not resolve vanity username "${parsed.value}".`;
+          if (!apiKey) {
+            errorMsg = `Steam API Key is missing. Set STEAM_API_KEY in .env.local / Cloudflare or enter your key in the API Key settings.`;
+          } else if (apiKey.length !== 32) {
+            errorMsg = `Steam API Key is invalid (${apiKey.length} characters instead of 32). Check for missing characters from steamcommunity.com/dev/apikey.`;
+          }
           resolvedResults.push({
             inputQuery: rawInput,
             id: null,
-            error: apiKey
-              ? `Could not resolve vanity username "${parsed.value}"`
-              : `Steam API Key required to resolve "${parsed.value}". Enter key in API Key modal or set in .env.local.`,
+            error: errorMsg,
           });
         }
       }
