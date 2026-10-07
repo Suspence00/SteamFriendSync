@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
         } else {
           let errorMsg = `Could not resolve vanity username "${parsed.value}".`;
           if (!apiKey) {
-            errorMsg = `Steam API Key is missing. Set STEAM_API_KEY in .env.local / Cloudflare or enter your key in the API Key settings.`;
+            errorMsg = `Steam API Key is not configured on the server. Please ensure STEAM_API_KEY is configured in the environment settings.`;
           }
           resolvedResults.push({
             inputQuery: rawInput,

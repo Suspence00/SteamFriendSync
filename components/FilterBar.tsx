@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { FilterPreset, SortOption, ViewMode, PlayerData } from '@/types/steam';
-import { Search, LayoutGrid, Table, Layers, Filter, Plus, X, Tag } from 'lucide-react';
+import { Search, LayoutGrid, Table, Layers, Filter, Plus, X, Tag, BarChart3, Clock } from 'lucide-react';
 
 interface FilterBarProps {
   activePreset: FilterPreset;
@@ -32,6 +32,9 @@ interface FilterBarProps {
   selectedMatrixPlayerIds: string[];
   onToggleMatrixPlayer: (id: string) => void;
   onClearMatrixFilter: () => void;
+  minPlaytimeHours: number;
+  onMinPlaytimeChange: (hours: number) => void;
+  onOpenStats: () => void;
 }
 
 export function FilterBar({
@@ -56,6 +59,9 @@ export function FilterBar({
   selectedMatrixPlayerIds,
   onToggleMatrixPlayer,
   onClearMatrixFilter,
+  minPlaytimeHours,
+  onMinPlaytimeChange,
+  onOpenStats,
 }: FilterBarProps) {
   const [tagSearchInput, setTagSearchInput] = useState('');
   const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false);
@@ -217,30 +223,41 @@ export function FilterBar({
           </button>
         </div>
 
-        {/* View Mode Toggle */}
-        <div className="flex items-center gap-1 bg-neutral-900 p-1 rounded border border-neutral-800">
+        {/* View Mode & Stats Controls */}
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => onViewModeChange('grid')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-semibold transition-colors ${
-              viewMode === 'grid'
-                ? 'bg-neutral-800 text-white'
-                : 'text-neutral-400 hover:text-white'
-            }`}
+            onClick={onOpenStats}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-semibold transition-colors bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-700 hover:text-white"
+            title="Open Library & Playtime Statistics"
           >
-            <LayoutGrid className="w-4 h-4" />
-            <span>Cards</span>
+            <BarChart3 className="w-4 h-4 text-neutral-400" />
+            <span>Stats</span>
           </button>
-          <button
-            onClick={() => onViewModeChange('table')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-semibold transition-colors ${
-              viewMode === 'table'
-                ? 'bg-neutral-800 text-white'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            <Table className="w-4 h-4" />
-            <span>Table</span>
-          </button>
+
+          <div className="flex items-center gap-1 bg-neutral-900 p-1 rounded border border-neutral-800">
+            <button
+              onClick={() => onViewModeChange('grid')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-semibold transition-colors ${
+                viewMode === 'grid'
+                  ? 'bg-neutral-800 text-white'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span>Cards</span>
+            </button>
+            <button
+              onClick={() => onViewModeChange('table')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-semibold transition-colors ${
+                viewMode === 'table'
+                  ? 'bg-neutral-800 text-white'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <Table className="w-4 h-4" />
+              <span>Table</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -353,6 +370,26 @@ export function FilterBar({
           )}
         </div>
 
+        {/* Min Playtime Filter */}
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-sm text-neutral-400 hidden lg:inline font-medium">Time:</span>
+          <select
+            value={minPlaytimeHours}
+            onChange={(e) => onMinPlaytimeChange(Number(e.target.value))}
+            className={`px-3 py-2 text-sm font-semibold rounded border bg-neutral-950 text-white focus:outline-none focus:border-white ${
+              minPlaytimeHours > 0 ? 'border-neutral-500 bg-neutral-900' : 'border-neutral-800'
+            }`}
+            title="Filter games with minimum playtime (e.g. exclude trading card farming)"
+          >
+            <option value={0}>Playtime: Any (0h+)</option>
+            <option value={1}>≥ 1 hour</option>
+            <option value={5}>≥ 5 hours (Hide Card Farms)</option>
+            <option value={10}>≥ 10 hours</option>
+            <option value={20}>≥ 20 hours</option>
+            <option value={50}>≥ 50 hours</option>
+          </select>
+        </div>
+
         {/* Sort Select */}
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-sm text-neutral-400 hidden lg:inline font-medium">Sort:</span>
@@ -369,10 +406,26 @@ export function FilterBar({
         </div>
       </div>
 
-      {/* Selected Tag Filter Badges */}
-      {selectedTags.length > 0 && (
+      {/* Selected Filters Badges */}
+      {(selectedTags.length > 0 || minPlaytimeHours > 0) && (
         <div className="flex flex-wrap items-center gap-2 pt-1">
-          <span className="text-xs font-semibold text-neutral-400">Active Tag Filters:</span>
+          <span className="text-xs font-semibold text-neutral-400">Active Filters:</span>
+
+          {minPlaytimeHours > 0 && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-neutral-800 text-neutral-200 border border-neutral-700 text-xs font-bold">
+              <Clock className="w-3.5 h-3.5 text-neutral-400" />
+              <span>≥ {minPlaytimeHours}h Playtime</span>
+              <button
+                type="button"
+                onClick={() => onMinPlaytimeChange(0)}
+                className="hover:text-red-400 transition-colors ml-0.5"
+                title="Remove minimum playtime filter"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </span>
+          )}
+
           {selectedTags.map((tag) => (
             <span
               key={tag}
@@ -392,10 +445,13 @@ export function FilterBar({
 
           <button
             type="button"
-            onClick={onClearTags}
+            onClick={() => {
+              onClearTags();
+              onMinPlaytimeChange(0);
+            }}
             className="text-xs text-neutral-400 hover:text-white underline ml-1"
           >
-            Clear all tags
+            Clear all filters
           </button>
         </div>
       )}

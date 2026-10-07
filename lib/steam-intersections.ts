@@ -60,6 +60,44 @@ export const KNOWN_GAME_TAGS: Record<number, { categories: string[]; genres: str
   4000: { categories: ["Sandbox", "Moddable", "Multiplayer", "Physics", "Funny", "Comedy", "First-Person", "Shooter", "Singleplayer"], genres: ["Indie", "Simulation"] }, // Garry's Mod
   1426210: { categories: ["Co-op", "Online Co-Op", "Local Co-Op", "Puzzle", "Action", "Adventure", "Platformer", "2 Player", "Split Screen"], genres: ["Action", "Adventure"] }, // It Takes Two
   848450: { categories: ["Co-op", "Online Co-Op", "Local Co-Op", "Action", "Adventure", "Story Rich", "Split Screen"], genres: ["Action", "Adventure"] }, // A Way Out
+  // RPGs & Action RPGs
+  1091500: { categories: ["RPG", "Cyberpunk", "Open World", "Singleplayer", "Story Rich", "First-Person", "Sci-Fi", "Action RPG"], genres: ["RPG", "Action"] }, // Cyberpunk 2077
+  292030: { categories: ["RPG", "Open World", "Story Rich", "Atmospheric", "Fantasy", "Singleplayer", "Third Person"], genres: ["RPG", "Adventure"] }, // The Witcher 3
+  489830: { categories: ["RPG", "Open World", "Fantasy", "Singleplayer", "Moddable", "Atmospheric", "Action RPG"], genres: ["RPG"] }, // Skyrim Special Edition
+  377160: { categories: ["RPG", "Open World", "Post-apocalyptic", "Singleplayer", "Shooter", "Sci-Fi", "Action RPG"], genres: ["RPG"] }, // Fallout 4
+  2344520: { categories: ["Action RPG", "Hack and Slash", "Dark Fantasy", "Multiplayer", "Co-op", "Online Co-Op", "PvP"], genres: ["Action", "RPG"] }, // Diablo IV
+  1716740: { categories: ["RPG", "Space", "Open World", "Sci-Fi", "Singleplayer", "Exploration", "Action RPG"], genres: ["RPG", "Action"] }, // Starfield
+  1145360: { categories: ["Roguelike", "Action Roguelike", "Hack and Slash", "Indie", "Mythology", "Singleplayer", "Story Rich"], genres: ["Action", "Indie", "RPG"] }, // Hades
+  1145350: { categories: ["Roguelike", "Action Roguelike", "Hack and Slash", "Indie", "Mythology", "Singleplayer"], genres: ["Action", "Indie", "RPG"] }, // Hades II
+  1687950: { categories: ["JRPG", "Story Rich", "Turn-Based Combat", "Singleplayer", "Anime", "Soundtrack"], genres: ["RPG"] }, // Persona 5 Royal
+  1462040: { categories: ["RPG", "Action RPG", "Story Rich", "Singleplayer", "Third Person"], genres: ["RPG", "Action"] }, // Final Fantasy VII Remake
+  367520: { categories: ["Metroidvania", "Souls-like", "Difficult", "Platformer", "2D", "Indie", "Singleplayer", "Dark Fantasy"], genres: ["Action", "Adventure", "Indie"] }, // Hollow Knight
+
+  // Strategy, Automation & City Builders
+  289070: { categories: ["Strategy", "Turn-Based Strategy", "Historical", "4X", "Multiplayer", "Singleplayer", "Tactical"], genres: ["Strategy"] }, // Civilization VI
+  8930: { categories: ["Strategy", "Turn-Based Strategy", "Historical", "4X", "Multiplayer", "Singleplayer"], genres: ["Strategy"] }, // Civilization V
+  281990: { categories: ["Space", "Strategy", "4X", "Sci-Fi", "Grand Strategy", "Multiplayer", "Singleplayer"], genres: ["Strategy", "Simulation"] }, // Stellaris
+  394360: { categories: ["Strategy", "Grand Strategy", "Historical", "Military", "World War II", "Multiplayer", "Singleplayer"], genres: ["Strategy", "Simulation"] }, // Hearts of Iron IV
+  236850: { categories: ["Grand Strategy", "Strategy", "Historical", "Multiplayer", "Singleplayer"], genres: ["Strategy", "Simulation"] }, // Europa Universalis IV
+  1158310: { categories: ["RPG", "Grand Strategy", "Medieval", "Historical", "Strategy", "Multiplayer", "Simulation"], genres: ["RPG", "Strategy", "Simulation"] }, // Crusader Kings III
+  1142710: { categories: ["Strategy", "Grand Strategy", "Turn-Based Strategy", "Dark Fantasy", "Warhammer 40k", "Multiplayer"], genres: ["Strategy", "Action"] }, // Total War: WARHAMMER III
+  255710: { categories: ["City Builder", "Simulation", "Building", "Management", "Strategy", "Sandbox", "Singleplayer"], genres: ["Simulation", "Strategy"] }, // Cities: Skylines
+  949230: { categories: ["City Builder", "Simulation", "Building", "Management", "Strategy", "Sandbox"], genres: ["Simulation", "Strategy"] }, // Cities: Skylines II
+  646570: { categories: ["Roguelike Deckbuilder", "Card Battler", "Turn-Based Combat", "Strategy", "Indie", "Singleplayer"], genres: ["Strategy", "Indie"] }, // Slay the Spire
+  2379780: { categories: ["Roguelike Deckbuilder", "Card Game", "Poker", "Strategy", "Casual", "Indie", "Singleplayer"], genres: ["Casual", "Indie", "Strategy"] }, // Balatro
+  1794680: { categories: ["Action Roguelike", "Pixel Graphics", "Bullet Hell", "Casual", "Indie", "Singleplayer"], genres: ["Action", "Casual", "Indie"] }, // Vampire Survivors
+
+  // Simulation, Sports & Racing
+  252950: { categories: ["Multiplayer", "Soccer", "Sports", "Competitive", "PvP", "Online PvP", "Co-op", "Fast-Paced"], genres: ["Action", "Sports", "Racing"] }, // Rocket League
+  1222670: { categories: ["Life Sim", "Character Customization", "Building", "Casual", "Simulation", "Singleplayer"], genres: ["Simulation", "Free to Play"] }, // The Sims 4
+  227300: { categories: ["Driving", "Simulation", "Automobile Sim", "Open World", "Multiplayer", "Singleplayer"], genres: ["Indie", "Simulation"] }, // Euro Truck Simulator 2
+  270880: { categories: ["Driving", "Simulation", "Automobile Sim", "Open World", "Multiplayer", "Singleplayer"], genres: ["Indie", "Simulation"] }, // American Truck Simulator
+  1248130: { categories: ["Farming Sim", "Simulation", "Agriculture", "Multiplayer", "Co-op", "Singleplayer"], genres: ["Simulation"] }, // Farming Simulator 22
+  1551360: { categories: ["Racing", "Open World", "Driving", "Multiplayer", "Automobile Sim", "Singleplayer", "PvP"], genres: ["Racing", "Action", "Adventure"] }, // Forza Horizon 5
+  1293830: { categories: ["Racing", "Open World", "Driving", "Multiplayer", "Automobile Sim", "Singleplayer", "PvP"], genres: ["Racing", "Action"] }, // Forza Horizon 4
+  2252570: { categories: ["Sports", "Management", "Football", "Soccer", "Simulation", "Strategy"], genres: ["Simulation", "Sports", "Strategy"] }, // Football Manager 2024
+  2195250: { categories: ["Soccer", "Sports", "Football", "Multiplayer", "PvP", "Online PvP", "Controller"], genres: ["Sports"] }, // EA SPORTS FC 24
+  2050650: { categories: ["Survival Horror", "Zombies", "Action", "Shooter", "Third-Person Shooter", "Singleplayer"], genres: ["Action", "Adventure"] }, // Resident Evil 4 Remake
 };
 
 export function calculateLibraryIntersections(
@@ -148,23 +186,68 @@ export function calculateLibraryIntersections(
       (curatedTags.genres || []).forEach((g) => genreSet.add(g));
     }
 
-    // Heuristics from game name if no tags found yet
+    // Comprehensive heuristics from game name if specific genres or tags not yet resolved
     const nameLower = entry.name.toLowerCase();
+
+    // Survival / Crafting
     if (nameLower.includes('craft') || nameLower.includes('survival') || nameLower.includes('rust') || nameLower.includes('valheim') || nameLower.includes('terraria') || nameLower.includes('forest') || nameLower.includes('enshrouded') || nameLower.includes('palworld') || nameLower.includes('ark')) {
       tagSet.add('Crafting');
       tagSet.add('Survival');
       tagSet.add('Open World Survival Craft');
       tagSet.add('Building');
+      genreSet.add('Adventure');
     }
-    if (nameLower.includes('dungeon') || nameLower.includes('rpg') || nameLower.includes('dragon') || nameLower.includes('fantasy') || nameLower.includes('quest') || nameLower.includes('witcher') || nameLower.includes('souls') || nameLower.includes('ring')) {
+
+    // RPG
+    if (nameLower.includes('dungeon') || nameLower.includes('rpg') || nameLower.includes('dragon') || nameLower.includes('fantasy') || nameLower.includes('quest') || nameLower.includes('witcher') || nameLower.includes('souls') || nameLower.includes('ring') || nameLower.includes('baldur') || nameLower.includes('divinity') || nameLower.includes('fallout') || nameLower.includes('skyrim') || nameLower.includes('elder scrolls') || nameLower.includes('cyberpunk') || nameLower.includes('persona') || nameLower.includes('final fantasy')) {
       tagSet.add('RPG');
       tagSet.add('Action RPG');
+      genreSet.add('RPG');
     }
-    if (nameLower.includes('war') || nameLower.includes('strike') || nameLower.includes('duty') || nameLower.includes('shooter') || nameLower.includes('sniper') || nameLower.includes('battlefield') || nameLower.includes('siege') || nameLower.includes('fps')) {
+
+    // Strategy
+    if (nameLower.includes('civilization') || nameLower.includes('total war') || nameLower.includes('crusader kings') || nameLower.includes('hearts of iron') || nameLower.includes('stellaris') || nameLower.includes('europa universalis') || nameLower.includes('starcraft') || nameLower.includes('age of empires') || nameLower.includes('xcom') || nameLower.includes('rimworld') || nameLower.includes('factorio') || nameLower.includes('tactics') || nameLower.includes('command & conquer') || nameLower.includes('anno') || nameLower.includes('slay the spire') || nameLower.includes('balatro') || nameLower.includes('strategy')) {
+      tagSet.add('Strategy');
+      genreSet.add('Strategy');
+    }
+
+    // Simulation
+    if (nameLower.includes('simulator') || nameLower.includes('sim ') || nameLower.includes('flight') || nameLower.includes('farming') || nameLower.includes('truck') || nameLower.includes('train') || nameLower.includes('cities:') || nameLower.includes('planet zoo') || nameLower.includes('planet coaster') || nameLower.includes('tycoon') || nameLower.includes('flipper') || nameLower.includes('the sims')) {
+      tagSet.add('Simulation');
+      genreSet.add('Simulation');
+    }
+
+    // Shooters / FPS
+    if (nameLower.includes('war') || nameLower.includes('strike') || nameLower.includes('duty') || nameLower.includes('shooter') || nameLower.includes('sniper') || nameLower.includes('battlefield') || nameLower.includes('siege') || nameLower.includes('fps') || nameLower.includes('counter-strike') || nameLower.includes('black ops') || nameLower.includes('doom') || nameLower.includes('halo') || nameLower.includes('destiny') || nameLower.includes('apex') || nameLower.includes('overwatch') || nameLower.includes('pubg')) {
       tagSet.add('FPS');
       tagSet.add('Shooter');
       tagSet.add('PvP');
       tagSet.add('Online PvP');
+      genreSet.add('Action');
+    }
+
+    // Racing & Driving
+    if (nameLower.includes('forza') || nameLower.includes('need for speed') || nameLower.includes('dirt') || nameLower.includes('racing') || nameLower.includes('rally') || nameLower.includes('f1') || nameLower.includes('assetto') || nameLower.includes('grid') || nameLower.includes('motorsport') || nameLower.includes('burnout')) {
+      tagSet.add('Racing');
+      genreSet.add('Racing');
+    }
+
+    // Sports
+    if (nameLower.includes('fifa') || nameLower.includes('nba') || nameLower.includes('fc 2') || nameLower.includes('football') || nameLower.includes('madden') || nameLower.includes('rocket league') || nameLower.includes('wwe') || nameLower.includes('pga') || nameLower.includes('hockey')) {
+      tagSet.add('Sports');
+      genreSet.add('Sports');
+    }
+
+    // Horror
+    if (nameLower.includes('horror') || nameLower.includes('resident evil') || nameLower.includes('silent hill') || nameLower.includes('dead space') || nameLower.includes('outlast') || nameLower.includes('amnesia') || nameLower.includes('phasmophobia') || nameLower.includes('lethal company')) {
+      tagSet.add('Horror');
+      genreSet.add('Action');
+    }
+
+    // Puzzle & Platformer
+    if (nameLower.includes('portal') || nameLower.includes('puzzle') || nameLower.includes('talos') || nameLower.includes('witness') || nameLower.includes('tetris') || nameLower.includes('hollow knight') || nameLower.includes('celeste') || nameLower.includes('cuphead') || nameLower.includes('platformer')) {
+      tagSet.add('Puzzle');
+      genreSet.add('Adventure');
     }
 
     if (tagSet.size === 0) {
@@ -173,6 +256,7 @@ export function calculateLibraryIntersections(
     }
     if (genreSet.size === 0) {
       genreSet.add('Action');
+      genreSet.add('Indie');
     }
 
     const game: IntersectedGame = {

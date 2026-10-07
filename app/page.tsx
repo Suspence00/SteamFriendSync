@@ -9,20 +9,19 @@ import { FilterBar } from '@/components/FilterBar';
 import { GameCard } from '@/components/GameCard';
 import { GameTable } from '@/components/GameTable';
 import { ExactCombinationsView } from '@/components/ExactCombinationsView';
-import { ApiKeyModal } from '@/components/ApiKeyModal';
 import { PrivateProfileModal } from '@/components/PrivateProfileModal';
+import { StatsModal } from '@/components/StatsModal';
 import { AlertCircle, Users } from 'lucide-react';
 
 export default function HomePage() {
   const [players, setPlayers] = useState<PlayerData[]>([]);
   const [activePlayerIds, setActivePlayerIds] = useState<string[]>([]);
-  const [apiKey, setApiKey] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [dynamicTags, setDynamicTags] = useState<Record<number, { categories: string[]; genres: string[] }>>({});
 
   // Modals
-  const [isApiKeyOpen, setIsApiKeyOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [privacyFocusPlayer, setPrivacyFocusPlayer] = useState<string | undefined>();
 
   // Filters & State
@@ -33,25 +32,7 @@ export default function HomePage() {
   const [sortOption, setSortOption] = useState<SortOption>('playtime_desc');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [selectedMatrixPlayerIds, setSelectedMatrixPlayerIds] = useState<string[]>([]);
-
-  // Load API Key from localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedKey = localStorage.getItem('steam_api_key') || '';
-      setApiKey(savedKey);
-    }
-  }, []);
-
-  const handleSaveApiKey = (key: string) => {
-    setApiKey(key);
-    if (typeof window !== 'undefined') {
-      if (key) {
-        localStorage.setItem('steam_api_key', key);
-      } else {
-        localStorage.removeItem('steam_api_key');
-      }
-    }
-  };
+  const [minPlaytimeHours, setMinPlaytimeHours] = useState<number>(0);
 
   // Sync state to URL params
   const updateUrlParams = useCallback((playerList: PlayerData[]) => {
@@ -68,8 +49,7 @@ export default function HomePage() {
 
   // Fetch games for players
   const fetchLibrariesForPlayers = async (
-    playerSummaries: PlayerData[],
-    keyToUse: string
+    playerSummaries: PlayerData[]
   ): Promise<PlayerData[]> => {
     try {
       const playerIds = playerSummaries.filter((p) => p.id && !p.isPrivate).map((p) => p.id);
@@ -78,7 +58,7 @@ export default function HomePage() {
       const res = await fetch('/api/steam/games', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerIds, apiKey: keyToUse }),
+        body: JSON.stringify({ playerIds }),
       });
 
       if (!res.ok) throw new Error('Failed to fetch owned games');
@@ -102,14 +82,21 @@ export default function HomePage() {
     }
   };
 
-  // Background fetch store tags for unique appids
+  // Background fetch store tags for unique appids (prioritizing most played games)
   const fetchStoreTagsForGames = useCallback(async (playerList: PlayerData[]) => {
-    const appidSet = new Set<number>();
+    const playtimeByAppId = new Map<number, number>();
     playerList.forEach((p) => {
-      (p.games || []).forEach((g) => appidSet.add(g.appid));
+      (p.games || []).forEach((g) => {
+        playtimeByAppId.set(
+          g.appid,
+          (playtimeByAppId.get(g.appid) || 0) + (g.playtime_forever || 0)
+        );
+      });
     });
 
-    const appids = Array.from(appidSet);
+    const appids = Array.from(playtimeByAppId.keys()).sort(
+      (a, b) => (playtimeByAppId.get(b) || 0) - (playtimeByAppId.get(a) || 0)
+    );
     if (appids.length === 0) return;
 
     try {
@@ -130,13 +117,13 @@ export default function HomePage() {
   }, []);
 
   // Resolve and load players
-  const resolveAndLoadPlayers = async (inputs: string[], keyToUse: string) => {
+  const resolveAndLoadPlayers = async (inputs: string[]) => {
     setIsLoading(true);
     try {
       const res = await fetch('/api/steam/resolve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inputs, apiKey: keyToUse }),
+        body: JSON.stringify({ inputs }),
       });
 
       if (!res.ok) throw new Error('Failed to resolve users');
@@ -144,7 +131,7 @@ export default function HomePage() {
       const resolvedPlayers: PlayerData[] = data.players || [];
 
       // Fetch owned games for resolved users
-      const enrichedPlayers = await fetchLibrariesForPlayers(resolvedPlayers, keyToUse);
+      const enrichedPlayers = await fetchLibrariesForPlayers(resolvedPlayers);
 
       setPlayers(enrichedPlayers);
       const validIds = enrichedPlayers.filter((p) => p.id).map((p) => p.id);
@@ -169,8 +156,7 @@ export default function HomePage() {
     if (usersParam) {
       const inputList = usersParam.split(',').map((s) => s.trim()).filter(Boolean);
       if (inputList.length > 0) {
-        const savedKey = localStorage.getItem('steam_api_key') || '';
-        resolveAndLoadPlayers(inputList, savedKey);
+        resolveAndLoadPlayers(inputList);
       }
     }
   }, []);
@@ -187,7 +173,7 @@ export default function HomePage() {
     const res = await fetch('/api/steam/resolve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ inputs: [input], apiKey }),
+      body: JSON.stringify({ inputs: [input] }),
     });
 
     if (!res.ok) throw new Error('Could not connect to Steam service');
@@ -199,7 +185,7 @@ export default function HomePage() {
     }
 
     const newPlayer = resolved[0];
-    const enriched = await fetchLibrariesForPlayers([newPlayer], apiKey);
+    const enriched = await fetchLibrariesForPlayers([newPlayer]);
     const fullPlayer = enriched[0];
 
     const updated = [...players, fullPlayer];
@@ -227,7 +213,7 @@ export default function HomePage() {
   const handleRefreshAll = () => {
     if (players.length > 0) {
       const inputs = players.map((p) => p.inputQuery || p.id);
-      resolveAndLoadPlayers(inputs, apiKey);
+      resolveAndLoadPlayers(inputs);
     }
   };
 
@@ -379,6 +365,12 @@ export default function HomePage() {
       list = list.filter((game) => game.name.toLowerCase().includes(q));
     }
 
+    // Filter by minimum playtime if configured (e.g. hide card farming)
+    if (minPlaytimeHours > 0) {
+      const minMins = minPlaytimeHours * 60;
+      list = list.filter((game) => game.totalGroupPlaytimeMinutes >= minMins);
+    }
+
     const sorted = [...list].sort((a, b) => {
       switch (sortOption) {
         case 'playtime_desc':
@@ -402,17 +394,18 @@ export default function HomePage() {
     selectedTags,
     searchQuery,
     sortOption,
+    minPlaytimeHours,
   ]);
 
   return (
     <div className="min-h-screen flex flex-col bg-black text-white text-base">
       {/* Header */}
       <Navbar
-        onOpenApiKey={() => setIsApiKeyOpen(true)}
         onOpenPrivacyGuide={(name) => {
           setPrivacyFocusPlayer(name);
           setIsPrivacyOpen(true);
         }}
+        onOpenStats={() => setIsStatsOpen(true)}
         onRefreshAll={handleRefreshAll}
         isLoading={isLoading}
         playerCount={players.length}
@@ -487,6 +480,9 @@ export default function HomePage() {
             selectedMatrixPlayerIds={selectedMatrixPlayerIds}
             onToggleMatrixPlayer={handleToggleMatrixPlayer}
             onClearMatrixFilter={handleClearMatrixFilter}
+            minPlaytimeHours={minPlaytimeHours}
+            onMinPlaytimeChange={setMinPlaytimeHours}
+            onOpenStats={() => setIsStatsOpen(true)}
           />
         )}
 
@@ -532,23 +528,35 @@ export default function HomePage() {
             <span className="font-bold text-neutral-300">SteamSync</span> — Steam Shared Library &amp; Overlap Finder
           </div>
           <div className="text-[11px] text-neutral-600">
-            Powered by Steam® Web API. Not affiliated with Valve Corporation.
+            Powered by Steam® Web API. Not affiliated with Valve Corporation. Uses public profile data only — no login, credentials, or personal information required.
           </div>
         </div>
       </footer>
 
       {/* Modals */}
-      <ApiKeyModal
-        isOpen={isApiKeyOpen}
-        onClose={() => setIsApiKeyOpen(false)}
-        apiKey={apiKey}
-        onSaveApiKey={handleSaveApiKey}
-      />
-
       <PrivateProfileModal
         isOpen={isPrivacyOpen}
         onClose={() => setIsPrivacyOpen(false)}
         privatePlayerNames={privatePlayers.map((p) => p.summary.personaname)}
+      />
+
+      <StatsModal
+        isOpen={isStatsOpen}
+        onClose={() => setIsStatsOpen(false)}
+        allGames={intersectionResults.allGames}
+        displayedGames={displayedGames}
+        activePlayers={activePlayers}
+        activePresetLabel={
+          activePreset === 'all_own'
+            ? 'All Own'
+            : activePreset === 'missing_one'
+            ? 'Missing 1'
+            : activePreset === 'threshold'
+            ? `≥ ${thresholdVal} Players`
+            : activePreset === 'combinations'
+            ? 'Subsets'
+            : 'All Games'
+        }
       />
     </div>
   );

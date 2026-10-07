@@ -1,19 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Share2, Key, RefreshCw, Check, HelpCircle } from 'lucide-react';
+import { Share2, RefreshCw, Check, BarChart3 } from 'lucide-react';
 
 interface NavbarProps {
-  onOpenApiKey: () => void;
   onOpenPrivacyGuide: (playerName?: string) => void;
+  onOpenStats: () => void;
   onRefreshAll: () => void;
   isLoading: boolean;
   playerCount: number;
 }
 
 export function Navbar({
-  onOpenApiKey,
   onOpenPrivacyGuide,
+  onOpenStats,
   onRefreshAll,
   isLoading,
   playerCount,
@@ -41,6 +41,17 @@ export function Navbar({
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {playerCount > 0 && (
+            <button
+              onClick={onOpenStats}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-neutral-900 text-neutral-200 hover:text-white hover:bg-neutral-800 border border-neutral-700 transition-colors"
+              title="View Library & Playtime Statistics"
+            >
+              <BarChart3 className="w-3.5 h-3.5 text-neutral-400" />
+              <span>Stats</span>
+            </button>
+          )}
+
           <button
             onClick={() => onOpenPrivacyGuide()}
             className="px-3 py-1.5 text-xs font-medium rounded bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800 transition-colors hidden sm:block"
@@ -59,13 +70,6 @@ export function Navbar({
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-white' : ''}`} />
             </button>
           )}
-
-          <button
-            onClick={onOpenApiKey}
-            className="px-3 py-1.5 text-xs font-medium rounded bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 border border-neutral-800 transition-colors"
-          >
-            API Key
-          </button>
 
           <button
             onClick={handleShare}
