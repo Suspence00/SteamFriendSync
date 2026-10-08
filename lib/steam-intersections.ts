@@ -139,8 +139,19 @@ export const KNOWN_GAME_TAGS: Record<number, KnownGameMeta> = {
   1551360: { categories: ["Racing", "Open World", "Driving", "Multiplayer", "Automobile Sim", "Singleplayer", "PvP"], genres: ["Racing", "Action", "Adventure"], maxPlayers: 12 }, // Forza Horizon 5
   1293830: { categories: ["Racing", "Open World", "Driving", "Multiplayer", "Automobile Sim", "Singleplayer", "PvP"], genres: ["Racing", "Action"], maxPlayers: 12 }, // Forza Horizon 4
   2252570: { categories: ["Sports", "Management", "Football", "Soccer", "Simulation", "Strategy"], genres: ["Simulation", "Sports", "Strategy"], maxPlayers: 1 }, // Football Manager 2024
-  2195250: { categories: ["Soccer", "Sports", "Football", "Multiplayer", "PvP", "Online PvP", "Controller"], genres: ["Sports"], maxPlayers: 4 }, // EA SPORTS FC 24
   2050650: { categories: ["Survival Horror", "Zombies", "Action", "Shooter", "Third-Person Shooter", "Singleplayer"], genres: ["Action", "Adventure"], maxPlayers: 1 }, // Resident Evil 4 Remake
+
+  // Popular Singleplayer Shooters, Immersive Sims & Action
+  1388770: { categories: ["Singleplayer", "FPS", "Immersive Sim", "Shooter", "Action", "Single-player"], genres: ["Action", "Indie", "Simulation"], maxPlayers: 1 }, // Cruelty Squad
+  1229490: { categories: ["Singleplayer", "FPS", "Fast-Paced", "Action", "Single-player"], genres: ["Action", "Early Access"], maxPlayers: 1 }, // ULTRAKILL
+  379720: { categories: ["Singleplayer", "FPS", "Action", "Shooter", "Single-player"], genres: ["Action"], maxPlayers: 1 }, // DOOM (2016)
+  782330: { categories: ["Singleplayer", "FPS", "Action", "Shooter", "Single-player"], genres: ["Action"], maxPlayers: 1 }, // DOOM Eternal
+  1593500: { categories: ["Singleplayer", "Action", "Adventure", "Story Rich", "Single-player"], genres: ["Action", "Adventure"], maxPlayers: 1 }, // God of War
+  282070: { categories: ["Singleplayer", "Survival", "War", "Atmospheric", "Single-player"], genres: ["Adventure", "Indie", "Simulation"], maxPlayers: 1 }, // This War of Mine
+  814380: { categories: ["Singleplayer", "Souls-like", "Difficult", "Action", "Single-player"], genres: ["Action", "Adventure"], maxPlayers: 1 }, // Sekiro: Shadows Die Twice
+  220: { categories: ["Singleplayer", "FPS", "Sci-Fi", "Classic", "Single-player"], genres: ["Action"], maxPlayers: 1 }, // Half-Life 2
+  7670: { categories: ["Singleplayer", "FPS", "Story Rich", "Atmospheric", "Single-player"], genres: ["Action"], maxPlayers: 1 }, // BioShock
+  205100: { categories: ["Singleplayer", "Stealth", "First-Person", "Action", "Single-player"], genres: ["Action", "Adventure"], maxPlayers: 1 }, // Dishonored
 };
 
 export function calculateLibraryIntersections(
@@ -260,12 +271,16 @@ export function calculateLibraryIntersections(
       genreSet.add('Simulation');
     }
 
-    // Shooters / FPS
-    if (nameLower.includes('war') || nameLower.includes('strike') || nameLower.includes('duty') || nameLower.includes('shooter') || nameLower.includes('sniper') || nameLower.includes('battlefield') || nameLower.includes('siege') || nameLower.includes('fps') || nameLower.includes('counter-strike') || nameLower.includes('black ops') || nameLower.includes('doom') || nameLower.includes('halo') || nameLower.includes('destiny') || nameLower.includes('apex') || nameLower.includes('overwatch') || nameLower.includes('pubg')) {
+    // FPS / Shooter genre tag (without falsely forcing PvP on singleplayer shooters)
+    if (nameLower.includes('counter-strike') || nameLower.includes('battlefield') || nameLower.includes('rainbow six siege') || nameLower.includes('apex legends') || nameLower.includes('overwatch') || nameLower.includes('pubg')) {
       tagSet.add('FPS');
       tagSet.add('Shooter');
       tagSet.add('PvP');
       tagSet.add('Online PvP');
+      genreSet.add('Action');
+    } else if (nameLower.includes('shooter') || nameLower.includes('sniper') || nameLower.includes('doom') || nameLower.includes('wolfenstein') || nameLower.includes('half-life') || nameLower.includes('bioshock') || nameLower.includes('cruelty squad')) {
+      tagSet.add('FPS');
+      tagSet.add('Shooter');
       genreSet.add('Action');
     }
 
@@ -293,35 +308,27 @@ export function calculateLibraryIntersections(
       genreSet.add('Adventure');
     }
 
-    if (tagSet.size === 0) {
-      tagSet.add('Multi-player');
-      tagSet.add('Co-op');
-    }
     if (genreSet.size === 0) {
       genreSet.add('Action');
-      genreSet.add('Indie');
     }
 
-    // Player capacity and multiplayer detection logic
+    // Player capacity and multiplayer detection logic:
+    // Only games with verified multiplayer categories or tags should be treated as multiplayer.
     let maxPlayers: number | undefined = curatedTags?.maxPlayers ?? dynamicTags?.maxPlayers;
     let minPlayers = 1;
 
     const allTagsArr = Array.from(tagSet);
-    const hasSingleplayer = allTagsArr.some((t) => /single[- ]?player/i.test(t));
-    const hasCoop = allTagsArr.some((t) => /co[- ]?op/i.test(t));
-    const hasPvp = allTagsArr.some((t) => /pvp|versus|competitive/i.test(t));
-    const hasMultiplayerTag = allTagsArr.some((t) => /multi[- ]?player|mmo|party game|battle royale|team[- ]?based/i.test(t));
+    const hasSingleplayer = allTagsArr.some((t) => /^single[- ]?player$/i.test(t.trim()) || t.toLowerCase() === 'singleplayer');
+    const hasCoop = allTagsArr.some((t) => /^co[- ]?op$/i.test(t.trim()) || /^online co-op$/i.test(t.trim()) || /^shared\/split screen co-op$/i.test(t.trim()) || /^lan co-op$/i.test(t.trim()));
+    const hasPvp = allTagsArr.some((t) => /^online pvp$/i.test(t.trim()) || /^lan pvp$/i.test(t.trim()) || /^shared\/split screen pvp$/i.test(t.trim()) || /^pvp$/i.test(t.trim()));
+    const hasMultiplayerTag = allTagsArr.some((t) => /^multi[- ]?player$/i.test(t.trim()) || /^mmo$/i.test(t.trim()) || /^massively multiplayer$/i.test(t.trim()) || /^party game$/i.test(t.trim()) || /^battle royale$/i.test(t.trim()) || /^cross-platform multiplayer$/i.test(t.trim()));
     const isMultiplayerCategory = hasCoop || hasPvp || hasMultiplayerTag;
 
     if (maxPlayers === undefined) {
-      if (allTagsArr.some((t) => /massively multiplayer|mmo|mmorpg/i.test(t))) {
-        maxPlayers = 32;
-      } else if (allTagsArr.some((t) => /battle royale/i.test(t))) {
-        maxPlayers = 60;
-      } else if (allTagsArr.some((t) => /4 player|party game/i.test(t))) {
-        maxPlayers = 4;
+      // If a game has explicit Singleplayer tag and NO multiplayer tags, or NO multiplayer categories at all:
+      if (!isMultiplayerCategory || (hasSingleplayer && !hasCoop && !hasMultiplayerTag && !hasPvp)) {
+        maxPlayers = 1;
       } else if (
-        allTagsArr.some((t) => /2 player/i.test(t)) ||
         nameLower.includes('it takes two') ||
         nameLower.includes('a way out') ||
         nameLower.includes('we were here') ||
@@ -331,16 +338,24 @@ export function calculateLibraryIntersections(
       ) {
         maxPlayers = 2;
         minPlayers = 2;
+      } else if (allTagsArr.some((t) => /massively multiplayer|mmo|mmorpg/i.test(t))) {
+        maxPlayers = 32;
+      } else if (allTagsArr.some((t) => /battle royale/i.test(t))) {
+        maxPlayers = 60;
+      } else if (allTagsArr.some((t) => /4 player local/i.test(t) || /^party game$/i.test(t.trim()))) {
+        maxPlayers = 4;
+      } else if (allTagsArr.some((t) => /^2 player$/i.test(t.trim()) || /^2 player local$/i.test(t.trim()))) {
+        maxPlayers = 2;
+        minPlayers = 2;
       } else if (isMultiplayerCategory) {
         maxPlayers = 4;
-      } else if (hasSingleplayer) {
-        maxPlayers = 1;
       } else {
-        maxPlayers = 4;
+        // Safe default: single-player (1 player)
+        maxPlayers = 1;
       }
     }
 
-    const isMultiplayer = maxPlayers > 1;
+    const isMultiplayer = (maxPlayers ?? 1) > 1;
 
     let playerSupportLabel = 'Singleplayer';
     if (isMultiplayer) {
@@ -350,9 +365,9 @@ export function calculateLibraryIntersections(
         playerSupportLabel = '3 Players';
       } else if (maxPlayers === 4) {
         playerSupportLabel = 'Up to 4 Players';
-      } else if (maxPlayers > 4 && maxPlayers <= 8) {
+      } else if (maxPlayers! > 4 && maxPlayers! <= 8) {
         playerSupportLabel = `Up to ${maxPlayers} Players`;
-      } else if (maxPlayers > 8 && maxPlayers <= 16) {
+      } else if (maxPlayers! > 8 && maxPlayers! <= 16) {
         playerSupportLabel = `${maxPlayers}+ Players`;
       } else {
         playerSupportLabel = 'Massive Multiplayer';

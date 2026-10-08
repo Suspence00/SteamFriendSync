@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ tags: {} });
     }
 
-    const slice = appids.slice(0, 100);
+    const slice = appids.slice(0, 300);
     const results: Record<number, { categories: string[]; genres: string[]; maxPlayers?: number }> = {};
 
     const missingAppIds: number[] = [];

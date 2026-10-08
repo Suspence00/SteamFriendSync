@@ -83,11 +83,13 @@ export default function HomePage() {
     }
   };
 
-  // Background fetch store tags for unique appids (prioritizing most played games)
+  // Background fetch store tags for unique appids (prioritizing shared games, then playtime)
   const fetchStoreTagsForGames = useCallback(async (playerList: PlayerData[]) => {
+    const gameOwnerCount = new Map<number, number>();
     const playtimeByAppId = new Map<number, number>();
     playerList.forEach((p) => {
       (p.games || []).forEach((g) => {
+        gameOwnerCount.set(g.appid, (gameOwnerCount.get(g.appid) || 0) + 1);
         playtimeByAppId.set(
           g.appid,
           (playtimeByAppId.get(g.appid) || 0) + (g.playtime_forever || 0)
@@ -95,9 +97,11 @@ export default function HomePage() {
       });
     });
 
-    const appids = Array.from(playtimeByAppId.keys()).sort(
-      (a, b) => (playtimeByAppId.get(b) || 0) - (playtimeByAppId.get(a) || 0)
-    );
+    const appids = Array.from(playtimeByAppId.keys()).sort((a, b) => {
+      const ownersDiff = (gameOwnerCount.get(b) || 0) - (gameOwnerCount.get(a) || 0);
+      if (ownersDiff !== 0) return ownersDiff;
+      return (playtimeByAppId.get(b) || 0) - (playtimeByAppId.get(a) || 0);
+    });
     if (appids.length === 0) return;
 
     try {
