@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { IntersectedGame, PlayerData } from '@/types/steam';
 import { formatPlaytime, getSteamStoreUrl, getSteamRunUrl } from '@/lib/utils';
-import { Play, ExternalLink, Check, Clock, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Play, ExternalLink, Check, Clock, ArrowUpDown, ArrowUp, ArrowDown, Users } from 'lucide-react';
 
 interface GameTableProps {
   games: IntersectedGame[];
@@ -153,15 +153,22 @@ export function GameTable({ games, activePlayers }: GameTableProps) {
                         {game.name}
                       </span>
                     </div>
-                    {(game.categories || []).length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {(game.categories || []).slice(0, 2).map((cat) => (
+                    <div className="flex flex-wrap items-center gap-1">
+                      {game.playerSupportLabel && (
+                        <span className="text-[10px] text-neutral-300 font-semibold px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-700 flex items-center gap-1">
+                          <Users className="w-2.5 h-2.5 text-neutral-400" />
+                          <span>{game.playerSupportLabel}</span>
+                        </span>
+                      )}
+                      {(game.categories || [])
+                        .filter((c) => !/single[- ]?player|multi[- ]?player/i.test(c))
+                        .slice(0, 2)
+                        .map((cat) => (
                           <span key={cat} className="text-[10px] text-neutral-400 font-medium px-1 rounded bg-neutral-900 border border-neutral-800">
                             {cat}
                           </span>
                         ))}
-                      </div>
-                    )}
+                    </div>
                   </div>
                 </td>
 

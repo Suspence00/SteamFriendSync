@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { IntersectedGame, PlayerData } from '@/types/steam';
 import { formatPlaytime, getSteamStoreUrl, getSteamRunUrl } from '@/lib/utils';
-import { Play, ExternalLink, Clock, Check, X, ShoppingBag } from 'lucide-react';
+import { Play, ExternalLink, Clock, Check, X, ShoppingBag, Users } from 'lucide-react';
 
 interface GameCardProps {
   game: IntersectedGame;
@@ -87,16 +87,33 @@ export function GameCard({ game, activePlayers }: GameCardProps) {
           {game.name}
         </h4>
 
-        {/* Tags */}
+        {/* Tags & Player Support */}
         <div className="flex flex-wrap items-center gap-1.5 mt-2">
-          {(game.categories || []).slice(0, 2).map((cat) => (
+          {game.playerSupportLabel && (
             <span
-              key={cat}
-              className="text-xs font-medium px-2 py-0.5 rounded bg-neutral-900 text-neutral-400 border border-neutral-800"
+              className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded border ${
+                game.isMultiplayer
+                  ? 'bg-neutral-900 text-neutral-200 border-neutral-700'
+                  : 'bg-neutral-950 text-neutral-500 border-neutral-800'
+              }`}
+              title={`Supported party size: ${game.playerSupportLabel}`}
             >
-              {cat}
+              <Users className="w-3 h-3 text-neutral-400" />
+              <span>{game.playerSupportLabel}</span>
             </span>
-          ))}
+          )}
+
+          {(game.categories || [])
+            .filter((c) => !/single[- ]?player|multi[- ]?player/i.test(c))
+            .slice(0, 2)
+            .map((cat) => (
+              <span
+                key={cat}
+                className="text-xs font-medium px-2 py-0.5 rounded bg-neutral-900 text-neutral-400 border border-neutral-800"
+              >
+                {cat}
+              </span>
+            ))}
         </div>
 
         {/* Missing 1 Buyer Callout */}

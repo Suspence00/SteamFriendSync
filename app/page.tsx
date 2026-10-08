@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { PlayerData, FilterPreset, SortOption, ViewMode, IntersectedGame } from '@/types/steam';
+import { PlayerData, FilterPreset, SortOption, ViewMode, IntersectedGame, PlayerCountFilter } from '@/types/steam';
 import { calculateLibraryIntersections } from '@/lib/steam-intersections';
 import { Navbar } from '@/components/Navbar';
 import { PlayerBar } from '@/components/PlayerBar';
@@ -17,7 +17,7 @@ export default function HomePage() {
   const [players, setPlayers] = useState<PlayerData[]>([]);
   const [activePlayerIds, setActivePlayerIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [dynamicTags, setDynamicTags] = useState<Record<number, { categories: string[]; genres: string[] }>>({});
+  const [dynamicTags, setDynamicTags] = useState<Record<number, { categories: string[]; genres: string[]; maxPlayers?: number }>>({});
 
   // Modals
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
@@ -31,6 +31,7 @@ export default function HomePage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState<SortOption>('playtime_desc');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [playerCountFilter, setPlayerCountFilter] = useState<PlayerCountFilter>('all');
   const [selectedMatrixPlayerIds, setSelectedMatrixPlayerIds] = useState<string[]>([]);
   const [minPlaytimeHours, setMinPlaytimeHours] = useState<number>(0);
 
@@ -365,6 +366,31 @@ export default function HomePage() {
       list = list.filter((game) => game.name.toLowerCase().includes(q));
     }
 
+    // Filter by player capacity / party size
+    if (playerCountFilter !== 'all') {
+      list = list.filter((game) => {
+        const max = game.maxPlayers ?? (game.isMultiplayer ? 4 : 1);
+        const isMulti = game.isMultiplayer !== false && max > 1;
+
+        switch (playerCountFilter) {
+          case 'multiplayer':
+            return isMulti;
+          case '3_plus':
+            return isMulti && max >= 3;
+          case '4_plus':
+            return isMulti && max >= 4;
+          case '5_plus':
+            return isMulti && max >= 5;
+          case '2_player':
+            return isMulti && max === 2;
+          case 'singleplayer':
+            return !isMulti || max === 1;
+          default:
+            return true;
+        }
+      });
+    }
+
     // Filter by minimum playtime if configured (e.g. hide card farming)
     if (minPlaytimeHours > 0) {
       const minMins = minPlaytimeHours * 60;
@@ -375,8 +401,12 @@ export default function HomePage() {
       switch (sortOption) {
         case 'playtime_desc':
           return b.totalGroupPlaytimeMinutes - a.totalGroupPlaytimeMinutes;
+        case 'playtime_asc':
+          return a.totalGroupPlaytimeMinutes - b.totalGroupPlaytimeMinutes;
         case 'owners_desc':
           return b.ownerCount - a.ownerCount || b.totalGroupPlaytimeMinutes - a.totalGroupPlaytimeMinutes;
+        case 'owners_asc':
+          return a.ownerCount - b.ownerCount || a.totalGroupPlaytimeMinutes - b.totalGroupPlaytimeMinutes;
         case 'name_asc':
           return a.name.localeCompare(b.name);
         case 'name_desc':
@@ -394,6 +424,7 @@ export default function HomePage() {
     selectedTags,
     searchQuery,
     sortOption,
+    playerCountFilter,
     minPlaytimeHours,
   ]);
 
@@ -471,6 +502,8 @@ export default function HomePage() {
             onSortChange={setSortOption}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
+            playerCountFilter={playerCountFilter}
+            onPlayerCountFilterChange={setPlayerCountFilter}
             selectedTags={selectedTags}
             onAddTag={handleAddTag}
             onRemoveTag={handleRemoveTag}

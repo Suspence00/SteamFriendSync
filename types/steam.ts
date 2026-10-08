@@ -59,6 +59,10 @@ export interface IntersectedGame {
   missingPlayers: string[]; // steamids of active players who do NOT own the game
   categories?: string[];
   genres?: string[];
+  maxPlayers?: number;
+  minPlayers?: number;
+  isMultiplayer?: boolean;
+  playerSupportLabel?: string;
 }
 
 export interface CombinationGroup {
@@ -81,5 +85,13 @@ export interface IntersectionResult {
 }
 
 export type FilterPreset = 'all_own' | 'missing_one' | 'threshold' | 'combinations' | 'all';
-export type SortOption = 'playtime_desc' | 'name_asc' | 'name_desc' | 'owners_desc' | 'recent_played';
+export type SortOption =
+  | 'playtime_desc'
+  | 'playtime_asc'
+  | 'owners_desc'
+  | 'owners_asc'
+  | 'name_asc'
+  | 'name_desc'
+  | 'recent_played';
+export type PlayerCountFilter = 'all' | 'multiplayer' | '3_plus' | '4_plus' | '5_plus' | '2_player' | 'singleplayer';
 export type ViewMode = 'grid' | 'table';

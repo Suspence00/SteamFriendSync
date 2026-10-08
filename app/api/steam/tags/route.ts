@@ -3,14 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 // In-memory cache for Steam Store App categories, genres, and community tags
-const tagCache = new Map<number, { categories: string[]; genres: string[]; expiresAt: number }>();
+const tagCache = new Map<number, { categories: string[]; genres: string[]; maxPlayers?: number; expiresAt: number }>();
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // Fetch Steam Community Tags & Store details
-async function fetchTagsForAppId(appid: number): Promise<{ categories: string[]; genres: string[] } | null> {
+async function fetchTagsForAppId(appid: number): Promise<{ categories: string[]; genres: string[]; maxPlayers?: number } | null> {
   const cached = tagCache.get(appid);
   if (cached && cached.expiresAt > Date.now()) {
-    return { categories: cached.categories, genres: cached.genres };
+    return { categories: cached.categories, genres: cached.genres, maxPlayers: cached.maxPlayers };
   }
 
   const allCategories = new Set<string>();
@@ -85,13 +85,13 @@ export async function POST(req: NextRequest) {
     }
 
     const slice = appids.slice(0, 100);
-    const results: Record<number, { categories: string[]; genres: string[] }> = {};
+    const results: Record<number, { categories: string[]; genres: string[]; maxPlayers?: number }> = {};
 
     const missingAppIds: number[] = [];
     slice.forEach((id) => {
       const cached = tagCache.get(id);
       if (cached && cached.expiresAt > Date.now()) {
-        results[id] = { categories: cached.categories, genres: cached.genres };
+        results[id] = { categories: cached.categories, genres: cached.genres, maxPlayers: cached.maxPlayers };
       } else {
         missingAppIds.push(id);
       }

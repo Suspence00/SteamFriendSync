@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { FilterPreset, SortOption, ViewMode, PlayerData } from '@/types/steam';
-import { Search, LayoutGrid, Table, Layers, Filter, Plus, X, Tag, BarChart3, Clock } from 'lucide-react';
+import { FilterPreset, SortOption, ViewMode, PlayerData, PlayerCountFilter } from '@/types/steam';
+import { Search, LayoutGrid, Table, Layers, Filter, Plus, X, Tag, BarChart3, Clock, Users, ArrowUpDown } from 'lucide-react';
 
 interface FilterBarProps {
   activePreset: FilterPreset;
@@ -23,6 +23,8 @@ interface FilterBarProps {
   onSortChange: (sort: SortOption) => void;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
+  playerCountFilter: PlayerCountFilter;
+  onPlayerCountFilterChange: (filter: PlayerCountFilter) => void;
   selectedTags: string[];
   onAddTag: (tag: string) => void;
   onRemoveTag: (tag: string) => void;
@@ -50,6 +52,8 @@ export function FilterBar({
   onSortChange,
   viewMode,
   onViewModeChange,
+  playerCountFilter,
+  onPlayerCountFilterChange,
   selectedTags,
   onAddTag,
   onRemoveTag,
@@ -66,6 +70,33 @@ export function FilterBar({
   const [tagSearchInput, setTagSearchInput] = useState('');
   const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false);
   const tagDropdownRef = useRef<HTMLDivElement>(null);
+
+  const isAscending = sortOption === 'playtime_asc' || sortOption === 'owners_asc' || sortOption === 'name_asc';
+
+  const handleToggleSortDirection = () => {
+    switch (sortOption) {
+      case 'playtime_desc':
+        onSortChange('playtime_asc');
+        break;
+      case 'playtime_asc':
+        onSortChange('playtime_desc');
+        break;
+      case 'owners_desc':
+        onSortChange('owners_asc');
+        break;
+      case 'owners_asc':
+        onSortChange('owners_desc');
+        break;
+      case 'name_asc':
+        onSortChange('name_desc');
+        break;
+      case 'name_desc':
+        onSortChange('name_asc');
+        break;
+      default:
+        onSortChange('playtime_asc');
+    }
+  };
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -177,7 +208,7 @@ export function FilterBar({
               >
                 {Array.from({ length: Math.max(0, activePlayerCount - 1) }, (_, i) => i + 2).map((num) => (
                   <option key={num} value={num}>
-                    ≥ {num} Players
+                    ≥ {num} Players Own
                   </option>
                 ))}
               </select>
@@ -370,6 +401,27 @@ export function FilterBar({
           )}
         </div>
 
+        {/* Party Size / Player Count Filter */}
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-sm text-neutral-400 hidden lg:inline font-medium">Party:</span>
+          <select
+            value={playerCountFilter}
+            onChange={(e) => onPlayerCountFilterChange(e.target.value as PlayerCountFilter)}
+            className={`px-3 py-2 text-sm font-semibold rounded border bg-neutral-950 text-white focus:outline-none focus:border-white ${
+              playerCountFilter !== 'all' ? 'border-neutral-500 bg-neutral-900' : 'border-neutral-800'
+            }`}
+            title="Filter games by supported player capacity / multiplayer mode"
+          >
+            <option value="all">Party Size: Any</option>
+            <option value="multiplayer">Multiplayer (2+ Players)</option>
+            <option value="3_plus">Good for 3+ Players</option>
+            <option value="4_plus">Good for 4+ Players (Squad)</option>
+            <option value="5_plus">Good for 5+ Players (Large Group)</option>
+            <option value="2_player">2 Players (Duo Only)</option>
+            <option value="singleplayer">Single-player Only</option>
+          </select>
+        </div>
+
         {/* Min Playtime Filter */}
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-sm text-neutral-400 hidden lg:inline font-medium">Time:</span>
@@ -381,17 +433,17 @@ export function FilterBar({
             }`}
             title="Filter games with minimum playtime (e.g. exclude trading card farming)"
           >
-            <option value={0}>Playtime: Any (0h+)</option>
-            <option value={1}>≥ 1 hour</option>
-            <option value={5}>≥ 5 hours (Hide Card Farms)</option>
-            <option value={10}>≥ 10 hours</option>
-            <option value={20}>≥ 20 hours</option>
-            <option value={50}>≥ 50 hours</option>
+            <option value="0">Playtime: Any (0h+)</option>
+            <option value="1">≥ 1 hour</option>
+            <option value="5">≥ 5 hours (Hide Card Farms)</option>
+            <option value="10">≥ 10 hours</option>
+            <option value="20">≥ 20 hours</option>
+            <option value="50">≥ 50 hours</option>
           </select>
         </div>
 
-        {/* Sort Select */}
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Sort Select & Reverse Sort Toggle */}
+        <div className="flex items-center gap-1.5 shrink-0">
           <span className="text-sm text-neutral-400 hidden lg:inline font-medium">Sort:</span>
           <select
             value={sortOption}
@@ -399,17 +451,64 @@ export function FilterBar({
             className="px-3 py-2 text-sm font-semibold rounded border border-neutral-800 bg-neutral-950 text-white focus:outline-none focus:border-white"
           >
             <option value="playtime_desc">Group Playtime (High → Low)</option>
+            <option value="playtime_asc">Group Playtime (Low → High)</option>
             <option value="owners_desc">Owner Count (High → Low)</option>
+            <option value="owners_asc">Owner Count (Low → High)</option>
             <option value="name_asc">Title (A → Z)</option>
             <option value="name_desc">Title (Z → A)</option>
           </select>
+
+          {/* Instant Reverse Sort Order Button */}
+          <button
+            type="button"
+            onClick={handleToggleSortDirection}
+            className={`p-2 rounded border transition-colors flex items-center justify-center ${
+              isAscending
+                ? 'border-neutral-500 bg-neutral-900 text-white'
+                : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white hover:border-neutral-700'
+            }`}
+            title={
+              sortOption === 'name_asc' || sortOption === 'name_desc'
+                ? `Reverse Sort: currently ${sortOption === 'name_asc' ? 'A → Z' : 'Z → A'} (Click to invert)`
+                : `Reverse Sort: currently ${isAscending ? 'Low → High' : 'High → Low'} (Click to invert)`
+            }
+          >
+            <ArrowUpDown className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
       {/* Selected Filters Badges */}
-      {(selectedTags.length > 0 || minPlaytimeHours > 0) && (
+      {(selectedTags.length > 0 || minPlaytimeHours > 0 || playerCountFilter !== 'all') && (
         <div className="flex flex-wrap items-center gap-2 pt-1">
           <span className="text-xs font-semibold text-neutral-400">Active Filters:</span>
+
+          {playerCountFilter !== 'all' && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-neutral-800 text-neutral-200 border border-neutral-700 text-xs font-bold">
+              <Users className="w-3.5 h-3.5 text-neutral-400" />
+              <span>
+                {playerCountFilter === '3_plus'
+                  ? '3+ Players'
+                  : playerCountFilter === '4_plus'
+                  ? '4+ Players'
+                  : playerCountFilter === '5_plus'
+                  ? '5+ Players'
+                  : playerCountFilter === 'multiplayer'
+                  ? 'Multiplayer'
+                  : playerCountFilter === '2_player'
+                  ? '2 Players (Duo)'
+                  : 'Singleplayer'}
+              </span>
+              <button
+                type="button"
+                onClick={() => onPlayerCountFilterChange('all')}
+                className="hover:text-red-400 transition-colors ml-0.5"
+                title="Remove party size filter"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </span>
+          )}
 
           {minPlaytimeHours > 0 && (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-neutral-800 text-neutral-200 border border-neutral-700 text-xs font-bold">
@@ -448,6 +547,7 @@ export function FilterBar({
             onClick={() => {
               onClearTags();
               onMinPlaytimeChange(0);
+              onPlayerCountFilterChange('all');
             }}
             className="text-xs text-neutral-400 hover:text-white underline ml-1"
           >
