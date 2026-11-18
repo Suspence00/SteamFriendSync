@@ -106,7 +106,7 @@ export async function resolveVanityUrl(vanityName: string, apiKey?: string): Pro
       return steamid;
     }
   } catch (err) {
-    console.error(`Error resolving vanity URL "${vanityName}":`, err);
+    console.error('Error resolving Steam vanity URL:', err);
   }
 
   return null;
